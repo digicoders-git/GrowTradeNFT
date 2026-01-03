@@ -1,140 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
 
-function Login() {
-  const navigate = useNavigate();
+const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const containerStyle = {
-    backgroundColor: '#0E547D',
-    ...(isMobile && {
-      paddingTop: '80px',
-      paddingLeft: '10px', 
-      paddingRight: '10px',
-      paddingBottom: '80px'
-    })
-  };
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Check if all required fields are filled
+
     if (!formData.email || !formData.password) {
       Swal.fire({
         icon: 'warning',
         title: 'Missing Fields',
-        text: 'Please fill all required fields!',
-        confirmButtonColor: '#3b82f6'
+        text: 'Please fill all fields',
+        confirmButtonColor: '#0f7a4a'
       });
       return;
     }
-    
-    // Simulate login process
-    console.log('Login Data:', formData);
-    Swal.fire({
-      icon: 'success',
-      title: 'Login Successful!',
-      text: 'Welcome back!',
-      confirmButtonColor: '#10b981'
-    }).then(() => {
-      navigate('/dashboard');
-    });
+
+    console.log("Login Data:", formData);
   };
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 relative" style={containerStyle}>
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white opacity-10 rounded-full animate-pulse"></div>
-        <div className="absolute top-20 right-10 w-32 h-32 bg-blue-300 opacity-20 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-purple-300 opacity-15 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-cyan-300 opacity-25 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-10 right-10 w-20 h-20 bg-indigo-300 opacity-20 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
-      </div>
-      
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-3 sm:p-6 relative z-10">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">Login</h2>
-        <p className="text-center text-gray-600 mb-6 text-sm font-bold">Welcome back to our platform</p>
-        
-        <form className="space-y-4">
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">Email <span className="text-red-500">*</span></label>
+    <div className="w-screen h-screen bg-[#eaf4ee] flex justify-center">
+      <div className="w-full max-w-[390px] h-full bg-white relative overflow-hidden flex flex-col">
+        {/* ===== TOP CURVE ===== */}
+        <div className="relative h-[230px] overflow-hidden shrink-0">
+          <svg
+            viewBox="0 0 375 230"
+            className="absolute top-0 left-0 w-full h-full"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="
+                M0 0
+                H375
+                V140
+                C300 200 75 200 0 140
+                Z
+              "
+              fill="#0f7a4a"
+            />
+          </svg>
+
+          <div className="absolute -top-16 right-[-60px] w-[180px] h-[180px] bg-[#7fc8a2] rounded-full"></div>
+
+          <div className="relative z-10 px-6 pt-10 text-white">
+            <p className="text-sm font-medium">Hi,</p>
+            <h1 className="text-[22px] font-bold leading-tight">
+              Please Login
+            </h1>
+          </div>
+        </div>
+
+        {/* ===== CENTER FORM AREA ===== */}
+        <div className="flex-1 flex  pt-10 justify-center">
+          <form onSubmit={handleSubmit} className="w-full px-6">
+            {/* EMAIL */}
+            <label className="text-sm font-semibold text-gray-700">Email</label>
             <input
               type="email"
-              id="email"
               name="email"
+              placeholder="email@test.com"
               value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
+              onChange={handleChange}
+              className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border border-[#b7d9c6] text-sm focus:outline-none focus:border-[#0f7a4a]"
             />
-          </div>
 
-          {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">Password <span className="text-red-500">*</span></label>
+            {/* PASSWORD */}
+            <label className="text-sm font-semibold text-gray-700 mt-4 block">
+              Password
+            </label>
             <input
               type="password"
-              id="password"
               name="password"
+              placeholder="********"
               value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Enter your password"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
+              onChange={handleChange}
+              className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border border-[#b7d9c6] text-sm focus:outline-none focus:border-[#0f7a4a]"
             />
-          </div>
 
-          {/* Login Button */}
-          <button 
-            type="button" 
-            onClick={handleLogin}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-lg font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:-translate-y-1 hover:shadow-lg mt-6"
-          >
-            Login
-          </button>
-
-          {/* Sign Up Link */}
-          <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">
-              Don't have an account? 
-              <button 
-                type="button"
-                onClick={() => navigate('/')}
-                className="text-blue-500 hover:text-blue-700 font-bold ml-1"
-              >
-                Sign Up
-              </button>
-            </p>
-          </div>
-        </form>
+            {/* SUBMIT */}
+            <button
+              type="submit"
+              className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-8"
+            >
+              Login
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default Login;
