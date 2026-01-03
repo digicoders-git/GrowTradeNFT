@@ -5,20 +5,20 @@ const WelcomeCard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-screen h-screen bg-[#dff1e6]">
-      <div className="w-full h-full bg-[#ededed] relative overflow-hidden">
+    <div className="w-screen h-screen bg-[#dff1e6] overflow-hidden">
+      <div className="w-full h-full bg-[#ededed] flex flex-col">
         {/* IMAGE SECTION */}
-        <div className="relative h-[70%] flex items-end justify-center">
+        <div className="relative flex-1 flex items-end justify-center overflow-hidden">
           <img
             src="/girl.png"
             alt="NFT Girl"
-            className="h-[97%] object-contain"
+            className="max-h-[85%] w-auto object-contain"
           />
 
-          {/* CURVE BETWEEN IMAGE & TEXT */}
+          {/* CURVE */}
           <svg
             viewBox="0 0 1440 120"
-            className="absolute bottom-0 w-full h-[80px] z-10"
+            className="absolute bottom-0 w-full h-[70px]"
             preserveAspectRatio="none"
           >
             <path
@@ -35,9 +35,9 @@ const WelcomeCard = () => {
           </svg>
         </div>
 
-        {/* WHITE TEXT SECTION */}
-        <div className="h-[30%] bg-white px-6 pt-6 relative overflow-hidden">
-          <h1 className="text-[28px] font-bold text-gray-900 leading-tight">
+        {/* TEXT SECTION */}
+        <div className="bg-white px-6 pt-6 pb-4 relative">
+          <h1 className="text-[26px] font-bold text-gray-900 leading-tight">
             Welcome To <br /> Change Token
           </h1>
 
@@ -46,8 +46,8 @@ const WelcomeCard = () => {
             blockchain technology.
           </p>
 
-          {/* BUTTON CURVED CORNER */}
-          <div className="absolute bottom-0 right-0 w-[150px] h-[90px] bg-white rounded-tl-[70px] flex items-center justify-center">
+          {/* BUTTON */}
+          <div className="flex justify-end mt-6">
             <button
               onClick={() => navigate("/login")}
               className="bg-green-600 text-white px-6 py-3 rounded-full text-sm font-semibold"
