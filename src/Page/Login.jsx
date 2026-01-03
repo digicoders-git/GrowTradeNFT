@@ -36,7 +36,7 @@ const Login = () => {
       title: "Login Successful 🎉",
       confirmButtonColor: "#0f7a4a",
     });
-    navigate("/Dashbord");
+    navigate("/dashbord");
   };
 
   return (
