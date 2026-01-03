@@ -1,278 +1,237 @@
-import React, { useState } from 'react';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { FaRegCopy } from "react-icons/fa";
+import { FaArrowsRotate } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
-function Singhup() {
+const Signup = () => {
   const navigate = useNavigate();
+
+  const generateWallet = () => {
+    const random = Math.random().toString(16).substring(2, 10);
+    return `0x${random}${Date.now().toString(16).slice(-8)}`;
+  };
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    mobile: '',
-    password: '',
-    referralId: '',
-    walletAddress: ''
+    name: "",
+    email: "",
+    mobile: "",
+    referenceId: "",
+    password: "",
+    confirmPassword: "",
+    walletAddress: "",
   });
 
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      walletAddress: generateWallet(),
+    }));
   }, []);
 
-  const containerStyle = {
-    backgroundColor: '#0E547D',
-    paddingTop: '60px',
-    ...(isMobile && {
-      paddingTop: '80px',
-      paddingLeft: '10px', 
-      paddingRight: '10px',
-      paddingBottom: '80px'
-    })
-  };
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const generateWalletAddress = () => {
-    const randomAddress = '0x' + Math.random().toString(16).substr(2, 40);
-    setFormData(prev => ({
+  const regenerateWallet = () => {
+    setFormData((prev) => ({
       ...prev,
-      walletAddress: randomAddress
+      walletAddress: generateWallet(),
     }));
   };
 
-  const handlePayment = (e) => {
-    e.preventDefault();
-    
-    // Check if all required fields are filled
-    if (!formData.name || !formData.email || !formData.mobile || !formData.password || !formData.walletAddress) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Missing Fields',
-        text: 'Please fill all required fields before payment!',
-        confirmButtonColor: '#3b82f6'
-      });
-      return;
-    }
-    
-    // Simulate payment process
-    console.log('Processing payment...');
+  const copyWallet = () => {
+    navigator.clipboard.writeText(formData.walletAddress);
     Swal.fire({
-      icon: 'info',
-      title: 'Processing Payment',
-      text: 'Please wait while we process your payment...',
+      icon: "success",
+      title: "Copied!",
+      text: "Wallet address copied",
+      timer: 1200,
       showConfirmButton: false,
-      timer: 2000
     });
-    
-    // Simulate payment completion after 2 seconds
-    setTimeout(() => {
-      setPaymentCompleted(true);
-      Swal.fire({
-        icon: 'success',
-        title: 'Payment Successful!',
-        text: 'Your payment has been completed successfully!',
-        confirmButtonColor: '#10b981'
-      });
-    }, 2000);
   };
 
-  const handleRegistration = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Registration Data:', formData);
+
     Swal.fire({
-      icon: 'success',
-      title: 'Registration Complete!',
-      text: 'Your registration has been completed successfully!',
-      confirmButtonColor: '#10b981'
+      icon: "success",
+      title: "Payment Successful 🎉",
+      text: "Your wallet is activated successfully",
+      confirmButtonColor: "#0f7a4a",
+      confirmButtonText: "Go to Login",
     }).then(() => {
-      navigate('/login');
+      navigate("/login");
     });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={containerStyle}>
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white opacity-10 rounded-full animate-pulse"></div>
-        <div className="absolute top-20 right-10 w-32 h-32 bg-blue-300 opacity-20 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-purple-300 opacity-15 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-cyan-300 opacity-25 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-10 right-10 w-20 h-20 bg-indigo-300 opacity-20 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
-      </div>
-      
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-3 sm:p-6 relative z-10">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">Sign Up</h2>
-        <p className="text-center text-gray-600 mb-6 text-base font-semibold">Join our platform today</p>
-        
-        <form className="space-y-4">
-          {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="block text-base font-bold text-gray-700 mb-2">Name <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter your full name"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
-            />
-          </div>
+    <div className="w-screen h-screen bg-[#eaf4ee] flex justify-center items-start md:items-center">
+      <div className="w-full max-w-[390px] h-full bg-white flex flex-col overflow-hidden md:max-w-[820px] md:h-[90vh] md:rounded-2xl md:shadow-2xl">
 
-          {/* Email Field */}
-          <div>
-            <label htmlFor="email" className="block text-base font-bold text-gray-700 mb-2">Email <span className="text-red-500">*</span></label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
-            />
-          </div>
+        {/* TOP CURVE */}
+        <div className="relative h-[230px] shrink-0 overflow-hidden">
+          <svg
+            viewBox="0 0 375 230"
+            className="absolute inset-0 w-full h-full"
+            preserveAspectRatio="none"
+          >
+            <path d="M0 0 H375 V140 C300 200 75 200 0 140 Z" fill="#0f7a4a" />
+          </svg>
 
-          {/* Mobile Number Field */}
-          <div>
-            <label htmlFor="mobile" className="block text-base font-bold text-gray-700 mb-2">Mobile Number <span className="text-red-500">*</span></label>
-            <input
-              type="tel"
-              id="mobile"
-              name="mobile"
-              value={formData.mobile}
-              onChange={handleInputChange}
-              placeholder="Enter your mobile number"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
-            />
-          </div>
+          <div className="absolute -top-16 right-[-60px] w-[180px] h-[180px] bg-[#7fc8a2] rounded-full"></div>
 
-          {/* Password Field */}
-          <div>
-            <label htmlFor="password" className="block text-base font-bold text-gray-700 mb-2">Password <span className="text-red-500">*</span></label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Enter your password"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-              required
-            />
+          <div className="relative z-10 px-6 pt-10 text-white">
+            <p className="text-sm font-medium">Hi,</p>
+            <h1 className="text-[22px] font-bold">Create Account</h1>
           </div>
+        </div>
 
-          {/* Referral ID Field */}
-          <div>
-            <label htmlFor="referralId" className="block text-base font-bold text-gray-700 mb-2">Referral ID </label>
-            <input
-              type="text"
-              id="referralId"
-              name="referralId"
-              value={formData.referralId}
-              onChange={handleInputChange}
-              placeholder="Enter referral ID if any"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
-            />
-          </div>
+        {/* FORM */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto px-6">
+            <div className="h-[10px]" />
 
-          {/* Wallet Address Section */}
-          <div>
-            <label className="block text-base font-bold text-gray-700 mb-2">Wallet Address <span className="text-red-500">*</span></label>
-            <div className="space-y-3">
+            <form onSubmit={handleSubmit}>
+              {/* GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+                <div>
+                  <label className="text-sm font-semibold">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="email@test.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+
+                <div className="mt-4 md:mt-0">
+                  <label className="text-sm font-semibold">Mobile</label>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    placeholder="+91XXXXXXXXXX"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+
+                <div className="mt-4 md:mt-0">
+                  <label className="text-sm font-semibold">
+                    Reference ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="referenceId"
+                    placeholder="REF12345"
+                    value={formData.referenceId}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+              </div>
+
+              {/* WALLET */}
+              <div className="mt-4">
+                <label className="text-sm font-semibold">
+                  Wallet Address (Auto Generated)
+                </label>
+                <div className="relative mt-2">
+                  <input
+                    readOnly
+                    value={formData.walletAddress}
+                    className="w-full px-4 py-[14px] pr-20 rounded-md bg-gray-100 border text-xs"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2 text-gray-600">
+                    <button type="button" onClick={copyWallet}>
+                      <FaRegCopy />
+                    </button>
+                    <button type="button" onClick={regenerateWallet}>
+                      <FaArrowsRotate />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* PASSWORD */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-4">
+                <div>
+                  <label className="text-sm font-semibold">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="********"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+
+                <div className="mt-4 md:mt-0">
+                  <label className="text-sm font-semibold">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="********"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
+              </div>
+
+              {/* PAYMENT */}
+              <div className="mt-5 p-3 bg-[#eef6f1] border rounded-md text-sm">
+                💳 <b>$10 One-Time Payment</b> required to activate your wallet
+              </div>
+
+              {/* SUBMIT */}
               <button
-                type="button"
-                onClick={generateWalletAddress}
-                className="w-full px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                type="submit"
+                className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-6"
               >
-                Generate Wallet Address
+                Create Account & Pay $10
               </button>
-              {formData.walletAddress && (
-                <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-green-500">
-                  <small className="text-gray-600 text-xs">Generated Address:</small>
-                  <p className="font-mono text-xs text-gray-800 break-all mt-1">{formData.walletAddress}</p>
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Registration Fee */}
-          <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-5 rounded-xl border-2 border-blue-200 shadow-lg">
-            <div className="text-center mb-3">
-              <h3 className="text-lg font-bold text-gray-800 mb-1">💳 Registration Fee</h3>
-              <p className="text-xs text-gray-600">One-time platform activation fee</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-inner border border-gray-100">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold text-sm">$</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Amount Due</p>
-                    <p className="text-xs text-gray-500">USDT Payment</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl font-extrabold text-green-600">$10</span>
-                  <p className="text-xs text-gray-500 font-medium">USDT</p>
-                </div>
-              </div>
-            </div>
-          </div>
+              {/* 🔑 ALREADY REGISTERED */}
+              <p className="text-center text-sm text-gray-600 mt-5">
+                Already registered?{" "}
+                <span
+                  onClick={() => navigate("/login")}
+                  className="text-[#0f7a4a] font-semibold cursor-pointer hover:underline"
+                >
+                  Login here
+                </span>
+              </p>
+            </form>
 
-          {/* Payment/Registration Button */}
-          {!paymentCompleted ? (
-            <button 
-              type="button" 
-              onClick={handlePayment}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-lg font-extrabold text-xl hover:from-blue-600 hover:to-purple-700 transition-all transform hover:-translate-y-1 hover:shadow-lg mt-6"
-            >
-              <div className="flex flex-col items-center">
-                <span>Pay $10 USDT</span>
-                {/* <span className="text-sm opacity-90 font-normal">Company Wallet</span> */}
-              </div>
-            </button>
-          ) : (
-            <button 
-              type="submit" 
-              onClick={handleRegistration}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-lg font-extrabold text-xl hover:from-green-600 hover:to-green-700 transition-all transform hover:-translate-y-1 hover:shadow-lg mt-6"
-            >
-              Complete Registration
-            </button>
-          )}
-          {/* Sign In Link */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-600">
-              Already have an account? 
-              <button 
-                type="button"
-                onClick={() => navigate('/login')}
-                className="text-blue-500 hover:text-blue-700 font-bold ml-1 underline"
-              >
-                Sign In
-              </button>
-            </p>
+            <div className="h-[20px]" />
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
-}
+};
 
-export default Singhup;
+export default Signup;

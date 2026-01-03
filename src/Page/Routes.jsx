@@ -5,6 +5,7 @@ import Login from "./Login";
 // import Singhup from "./Singhup";
 import Register from "./Singhup";
 import WelcomeCard from "./Welcome";
+import Dashbord from "./Dashbord";
 
 function Routesr() {
   return (
@@ -12,6 +13,7 @@ function Routesr() {
       <Route path="/" element={<WelcomeCard />} />
       <Route path="/SingUp" element={<Register />} />
       <Route path="/Login" element={<Login />} />
+      <Route path="/Dashbord" element={<Dashbord />} />
     </Routes>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Lottie from "lottie-react";
 
 const WelcomeCard = () => {
   const navigate = useNavigate();
@@ -7,18 +8,21 @@ const WelcomeCard = () => {
   return (
     <div className="w-screen h-screen bg-[#dff1e6] overflow-hidden">
       <div className="w-full h-full bg-[#ededed] flex flex-col">
-        {/* IMAGE SECTION */}
-        <div className="relative flex-1 flex items-end justify-center overflow-hidden">
-          <img
-            src="/girl.png"
-            alt="NFT Girl"
-            className="max-h-[85%] w-auto object-contain"
-          />
+        {/* ===== LOTTIE SECTION (TOUCHING CURVE) ===== */}
+        <div className="relative h-[55%] flex items-end justify-center overflow-hidden">
+          <div className="w-full max-w-[320px]">
+            <Lottie
+              path="/WelcomeGreen.json"
+              loop
+              autoplay
+              className="w-full h-auto"
+            />
+          </div>
 
           {/* CURVE */}
           <svg
             viewBox="0 0 1440 120"
-            className="absolute bottom-0 w-full h-[70px]"
+            className="absolute bottom-0 w-full h-[60px]"
             preserveAspectRatio="none"
           >
             <path
@@ -35,8 +39,8 @@ const WelcomeCard = () => {
           </svg>
         </div>
 
-        {/* TEXT SECTION */}
-        <div className="bg-white px-6 pt-6 pb-4 relative">
+        {/* ===== TEXT SECTION ===== */}
+        <div className="flex-1 bg-white px-6 pt-6 pb-4">
           <h1 className="text-[26px] font-bold text-gray-900 leading-tight">
             Welcome To <br /> Change Token
           </h1>
@@ -52,7 +56,7 @@ const WelcomeCard = () => {
               onClick={() => navigate("/login")}
               className="bg-green-600 text-white px-6 py-3 rounded-full text-sm font-semibold"
             >
-              explore NFTs
+              Explore NFTs
             </button>
           </div>
         </div>

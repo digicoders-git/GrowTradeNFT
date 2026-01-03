@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,65 +23,69 @@ const Login = () => {
 
     if (!formData.email || !formData.password) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Missing Fields',
-        text: 'Please fill all fields',
-        confirmButtonColor: '#0f7a4a'
+        icon: "warning",
+        title: "Missing Fields",
+        text: "Please fill all fields",
+        confirmButtonColor: "#0f7a4a",
       });
       return;
     }
 
-    console.log("Login Data:", formData);
+    Swal.fire({
+      icon: "success",
+      title: "Login Successful 🎉",
+      confirmButtonColor: "#0f7a4a",
+    });
+    navigate("/Dashbord");
   };
 
   return (
-    <div className="w-screen h-screen bg-[#eaf4ee] flex justify-center">
-      <div className="w-full max-w-[390px] h-full bg-white relative overflow-hidden flex flex-col">
+    <div className="w-screen h-screen bg-[#eaf4ee] flex justify-center items-start md:items-center">
+      {/* CARD */}
+      <div
+        className="
+          w-full max-w-[390px] h-full bg-white flex flex-col overflow-hidden
+          md:max-w-[460px] md:h-auto md:rounded-2xl md:shadow-2xl
+        "
+      >
         {/* ===== TOP CURVE ===== */}
         <div className="relative h-[230px] overflow-hidden shrink-0">
           <svg
             viewBox="0 0 375 230"
-            className="absolute top-0 left-0 w-full h-full"
+            className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
           >
-            <path
-              d="
-                M0 0
-                H375
-                V140
-                C300 200 75 200 0 140
-                Z
-              "
-              fill="#0f7a4a"
-            />
+            <path d="M0 0 H375 V140 C300 200 75 200 0 140 Z" fill="#0f7a4a" />
           </svg>
 
           <div className="absolute -top-16 right-[-60px] w-[180px] h-[180px] bg-[#7fc8a2] rounded-full"></div>
 
           <div className="relative z-10 px-6 pt-10 text-white">
             <p className="text-sm font-medium">Hi,</p>
-            <h1 className="text-[22px] font-bold leading-tight">
-              Please Login
-            </h1>
+            <h1 className="text-[22px] font-bold">Please Login</h1>
           </div>
         </div>
 
-        {/* ===== CENTER FORM AREA ===== */}
-        <div className="flex-1 flex  pt-10 justify-center">
-          <form onSubmit={handleSubmit} className="w-full px-6">
+        {/* ===== FORM ===== */}
+        <div className="flex-1 flex justify-center pt-10 md:pt-8">
+          <form className="w-full px-6 pb-10 md:px-10" onSubmit={handleSubmit}>
             {/* EMAIL */}
-            <label className="text-sm font-semibold text-gray-700">Email</label>
+            <label className="text-sm font-bold text-gray-700">Email</label>
             <input
               type="email"
               name="email"
               placeholder="email@test.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border border-[#b7d9c6] text-sm focus:outline-none focus:border-[#0f7a4a]"
+              className="
+                w-full mt-2 px-4 py-[14px] rounded-md
+                bg-white border border-black text-sm
+                focus:outline-none focus:border-black focus:ring-0
+              "
             />
 
             {/* PASSWORD */}
-            <label className="text-sm font-semibold text-gray-700 mt-4 block">
+            <label className="text-sm font-bold text-gray-700 mt-4 block">
               Password
             </label>
             <input
@@ -87,16 +94,31 @@ const Login = () => {
               placeholder="********"
               value={formData.password}
               onChange={handleChange}
-              className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border border-[#b7d9c6] text-sm focus:outline-none focus:border-[#0f7a4a]"
+              className="
+                w-full mt-2 px-4 py-[14px] rounded-md
+                bg-white border border-black text-sm
+                focus:outline-none focus:border-black focus:ring-0
+              "
             />
 
-            {/* SUBMIT */}
+            {/* LOGIN BUTTON */}
             <button
               type="submit"
               className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-8"
             >
               Login
             </button>
+
+            {/* SIGNUP LINK */}
+            <p className="text-center text-sm text-gray-600 mt-6">
+              Not registered yet?{" "}
+              <span
+                onClick={() => navigate("/SingUp")}
+                className="text-[#0f7a4a] font-semibold cursor-pointer hover:underline"
+              >
+                Create an account
+              </span>
+            </p>
           </form>
         </div>
       </div>
