@@ -35,9 +35,11 @@ export default function MainDashBord() {
   ];
 
   const menuItems = [
+    { to: "/dashbord/nft-marketplace", label: "NFT Marketplace", icon: <FaImage /> },
+    { to: "/dashbord/mlm-tree", label: "MLM Network", icon: <FaUsers /> },
+    { to: "/dashbord/package-upgrade", label: "Package Upgrade", icon: <FaChartBar /> },
     { to: "/dashbord/nft-history", label: "NFT History", icon: <FaImage /> },
-    { to: "/dashbord/reports", label: "Reports", icon: <FaChartBar /> },
-    { to: "/dashbord/settings", label: "Settings", icon: <FaCog /> },
+    { to: "/dashbord/admin", label: "Admin Panel", icon: <FaCog /> },
   ];
 
   return (

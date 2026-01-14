@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { authAPI } from "../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,8 +20,9 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (!formData.email || !formData.password) {
       Swal.fire({
@@ -28,15 +31,32 @@ const Login = () => {
         text: "Please fill all fields",
         confirmButtonColor: "#0f7a4a",
       });
+      setLoading(false);
       return;
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Login Successful 🎉",
-      confirmButtonColor: "#0f7a4a",
-    });
-    navigate("/dashbord");
+    try {
+      const response = await authAPI.login(formData);
+      
+      // Store token and user data
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful 🎉",
+        confirmButtonColor: "#0f7a4a",
+      });
+      navigate("/dashbord");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: error.response?.data?.message || "Something went wrong",
+        confirmButtonColor: "#0f7a4a",
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -104,9 +124,10 @@ const Login = () => {
             {/* LOGIN BUTTON */}
             <button
               type="submit"
-              className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-8"
+              disabled={loading}
+              className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-8 disabled:opacity-50"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             {/* SIGNUP LINK */}

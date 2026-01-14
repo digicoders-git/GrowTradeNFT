@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
-import { FaRegCopy } from "react-icons/fa";
+import { FaRegCopy, FaWallet } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { authAPI, walletAPI } from "../services/api";
+import reownWalletService from "../services/reownWalletService";
 
 const Signup = () => {
   const navigate = useNavigate();
-
-  // 🔐 Wallet Generator (random every time)
-  const generateWallet = () => {
-    const random = Math.random().toString(16).substring(2, 10);
-    return `0x${random}${Date.now().toString(16).slice(-8)}`;
-  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -18,18 +14,11 @@ const Signup = () => {
     mobile: "",
     password: "",
     confirmPassword: "",
-    walletAddress: "",
+    referralCode: "",
   });
+  const [connectedWallet, setConnectedWallet] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Page refresh / load → NEW wallet generate
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      walletAddress: generateWallet(),
-    }));
-  }, []);
-
-  // 🔁 Input handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -38,40 +27,164 @@ const Signup = () => {
     }));
   };
 
-  // 📋 Copy Wallet
-  const copyWallet = () => {
-    navigator.clipboard.writeText(formData.walletAddress);
-    Swal.fire({
-      icon: "success",
-      title: "Copied!",
-      text: "Wallet address copied",
-      timer: 1200,
-      showConfirmButton: false,
-    });
+  // Connect wallet using Reown modal
+  const connectWallet = async () => {
+    try {
+      const result = await reownWalletService.connectWallet();
+      
+      if (result.success) {
+        setConnectedWallet(result.account);
+        Swal.fire({
+          icon: "success",
+          title: "Wallet Connected!",
+          text: `Connected: ${result.account.substring(0, 6)}...${result.account.substring(38)}`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Connection Failed",
+          text: result.error,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to connect wallet",
+      });
+    }
   };
 
-  // 🚀 Submit
-  const handleSubmit = (e) => {
+  const copyWallet = () => {
+    if (connectedWallet) {
+      navigator.clipboard.writeText(connectedWallet);
+      Swal.fire({
+        icon: "success",
+        title: "Copied!",
+        text: "Wallet address copied",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    if (!connectedWallet) {
+      Swal.fire({
+        icon: "warning",
+        title: "Wallet Required",
+        text: "Please connect your crypto wallet first",
+      });
+      setLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "error",
         title: "Password Mismatch",
-        text: "Password aur Confirm Password same hone chahiye",
+        text: "Password and Confirm Password must match",
       });
+      setLoading(false);
       return;
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Payment Successful 🎉",
-      text: "Your wallet is activated successfully",
-      confirmButtonColor: "#0f7a4a",
-      confirmButtonText: "Go to Login",
-    }).then(() => {
-      navigate("/login");
-    });
+    try {
+      // Step 1: Register user
+      const response = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password,
+        walletAddress: connectedWallet,
+        referralCode: formData.referralCode || undefined
+      });
+
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Show registration success and start payment
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful!",
+        text: "Now processing $10 payment to activate your account...",
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      // Step 2: Automatically start payment process after 2 seconds
+      setTimeout(async () => {
+        await handlePayment();
+      }, 2000);
+      
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: error.response?.data?.message || "Something went wrong",
+      });
+      setLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+      
+      if (!connectedWallet) {
+        Swal.fire({
+          icon: "error",
+          title: "Wallet Not Connected",
+          text: "Please connect your Trust Wallet",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Company wallet address (valid Ethereum address)
+      const companyWallet = "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87";
+      
+      // Send payment using Reown service
+      const payment = await reownWalletService.sendPayment(companyWallet);
+      
+      if (!payment.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Payment Failed",
+          text: payment.error,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Activate wallet on backend
+      await walletAPI.activate({
+        txHash: payment.txHash,
+        walletAddress: connectedWallet
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Payment Successful 🎉",
+        text: "Your account is activated successfully",
+        confirmButtonColor: "#0f7a4a",
+        confirmButtonText: "Go to Dashboard",
+      }).then(() => {
+        navigate("/dashbord");
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Payment Processing Failed",
+        text: error.response?.data?.message || error.message,
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -136,23 +249,47 @@ const Signup = () => {
                     className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
                   />
                 </div>
+
+                <div className="mt-4">
+                  <label className="text-sm font-semibold">Referral Code (Optional)</label>
+                  <input
+                    type="text"
+                    name="referralCode"
+                    placeholder="Enter referral code if you have one"
+                    value={formData.referralCode}
+                    onChange={handleChange}
+                    className="w-full mt-2 px-4 py-[14px] rounded-md bg-[#eef6f1] border"
+                  />
+                </div>
               </div>
 
-              {/* WALLET */}
+              {/* WALLET CONNECTION */}
               <div className="mt-4">
-                <label className="text-sm font-semibold">Wallet Address</label>
-                <div className="relative mt-2">
-                  <input
-                    readOnly
-                    placeholder="Auto-generated wallet address"
-                    value={formData.walletAddress}
-                    className="w-full px-4 py-[14px] pr-16 rounded-md bg-gray-100 border text-xs"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <button type="button" onClick={copyWallet}>
-                      <FaRegCopy />
+                <label className="text-sm font-semibold">Crypto Wallet Address</label>
+                <div className="mt-2">
+                  {!connectedWallet ? (
+                    <button
+                      type="button"
+                      onClick={connectWallet}
+                      className="w-full bg-[#0f7a4a] text-white py-3 px-4 rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
+                    >
+                      <FaWallet />
+                      Connect Wallet
                     </button>
-                  </div>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        readOnly
+                        value={connectedWallet}
+                        className="w-full px-4 py-[14px] pr-16 rounded-md bg-green-50 border border-green-200 text-xs"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <button type="button" onClick={copyWallet}>
+                          <FaRegCopy className="text-green-600" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -183,14 +320,15 @@ const Signup = () => {
               </div>
 
               <div className="mt-5 p-3 bg-[#eef6f1] border rounded-md text-sm">
-                💳 <b>$10 One-Time Payment</b> required to activate your wallet
+                💳 <b>$10 One-Time Payment</b> required to activate your account
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-6"
+                disabled={loading}
+                className="w-full bg-[#0f7a4a] text-white py-4 rounded-md font-bold mt-6 disabled:opacity-50"
               >
-                Create Account & Pay $10
+                {loading ? "Processing Registration & Payment..." : "Register & Pay $10"}
               </button>
 
               <p className="text-center text-sm my-5">
@@ -202,6 +340,19 @@ const Signup = () => {
                   Login here
                 </span>
               </p>
+
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm">
+                <p className="text-blue-800">
+                  ℹ️ <b>Supported Wallets:</b>
+                </p>
+                <ul className="text-blue-700 mt-2 space-y-1">
+                  <li>• <b>MetaMask:</b> Browser extension</li>
+                  <li>• <b>Trust Wallet:</b> Mobile app with QR scan</li>
+                  <li>• <b>Coinbase Wallet:</b> Mobile & browser</li>
+                  <li>• <b>WalletConnect:</b> 300+ supported wallets</li>
+                  <li>• Get free test ETH from <a href="https://sepoliafaucet.com" target="_blank" className="text-[#0f7a4a] underline">Sepolia Faucet</a></li>
+                </ul>
+              </div>
             </form>
           </div>
         </div>
